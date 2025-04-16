@@ -1,2 +1,2 @@
-# solid-fiesta
+# NBALiveBot
 A twitch bot. 

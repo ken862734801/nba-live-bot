@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.eggs/
+dist/
+build/
+sdist/
+*.egg-info/
+*.deb
+*.rpm
+*.exe
+
+# Installer logs
+pip-log.txt
+pip-delete-this.txt
+pypiserver.log
+
+# Environments
+.venv/
+venv/
+env/
+ENV/
+*.env
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*.tmproj
+*.bak
+*.asv
