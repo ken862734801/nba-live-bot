@@ -2,7 +2,7 @@ from bot import Bot
 
 def main():
     bot = Bot()
-    print(bot.name)
+    bot.run()
 
 if __name__ == "__main__":
     main()
