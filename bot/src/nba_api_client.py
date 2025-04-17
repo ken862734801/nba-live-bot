@@ -1,68 +1,64 @@
-from nba_api.live.nba.endpoints import boxscore, scoreboard
 from nba_api.stats.static import teams
+from nba_api.stats.endpoints import teamgamelog
+from nba_api.live.nba.endpoints import scoreboard, boxscore
 
-def get_score(team_name: str) -> str:
-    """
-    Fetches the current score and game status for a given NBA team.
+def _all_teams():
+    return teams.get_teams()
 
-    Args:
-        team_name (str): The name of the NBA team to fetch the score for.
+def get_team_id(name):
+    n = name.lower()
+    for t in _all_teams():
+        if (
+            n in t["full_name"].lower()
+            or n in t["nickname"].lower()
+            or n in t["abbreviation"].lower()
+        ):
+            return t["id"]
+    return f"Team not found: {name}."
 
-    Returns:
-        str: A formatted string containing the game's score and status if the team is playing,
-             or a message indicating that the team is not currently playing.
-    """
+def get_record(name):
+    team_id = get_team_id(name)
+
     try:
-        all_teams = teams.get_teams()
-        matched_team = next(
-            (team for team in all_teams if team_name.lower() in team["full_name"].lower()),
-            None
-        )
-        if not matched_team:
-            return "Team not found."
-        
-        full_team_name = matched_team["full_name"]
+        game_log = teamgamelog.TeamGameLog(team_id=team_id)
+        game_log_df = game_log.get_data_frames()[0]
 
-        games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+        win_count = game_log_df.iloc[0]['W']
+        loss_count = game_log_df.iloc[0]['L']
 
-        for game in games:
-            game_id = game["gameId"]
-
-            home = game["homeTeam"]
-            away = game["awayTeam"]
-
-            full_home = f"{home['teamCity']} {home['teamName']}"
-            full_away = f"{away['teamCity']} {away['teamName']}"
-
-            if team_name.lower() in full_home.lower() or team_name.lower() in home["teamName"].lower():
-                return format_score(game_id, full_home, full_away)
-            elif team_name.lower() in full_away.lower() or team_name.lower() in away["teamName"].lower():
-                return format_score(game_id, full_home, full_away)
-
-        return f"The {full_team_name} are not currently playing."
-
+        return f'The {name} are {win_count} - {loss_count}.'
     except Exception as e:
-        return f"Error fetching boxscore: {e}"
+        return f'Error: {e}'
 
-def format_score(game_id: str, full_home: str, full_away: str) -> str:
-    """
-    Formats the score and game status for a given game.
+def get_score(name):
+    team_id = get_team_id(name)
 
-    Args:
-        game_id (str): The unique identifier for the game.
-        full_home (str): The full name of the home team (e.g., "Los Angeles Lakers").
-        full_away (str): The full name of the away team (e.g., "Golden State Warriors").
+    full_name = next(
+        (t["full_name"] for t in _all_teams() if t["id"] == team_id),
+        name
+    )
 
-    Returns:
-        str: A formatted string containing the score and game status.
-    """
-    data = boxscore.BoxScore(game_id=game_id).get_dict()
+    try:
+        games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+        for g in games:
+            home = g["homeTeam"]
+            away = g["awayTeam"]
 
-    home_team = data["game"]["homeTeam"]
-    away_team = data["game"]["awayTeam"]
-    status = data["game"]["gameStatusText"]
+            if home["teamId"] == team_id or away["teamId"] == team_id:
+                away_team = f"{away['teamCity']} {away['teamName']}"
+                home_team = f"{home['teamCity']} {home['teamName']}"
+            
+            b = boxscore.BoxScore(game_id=g["gameId"])
+            status = b.get_dict()["gameStatusText"]
+            away_score = b.get_dict()["homeTeamScore"]
+            home_score = b.get_dict()["awayTeamScore"]
 
-    home_score = home_team["score"]
-    away_score = away_team["score"]
+            return f"{away_team} {away_home} - {home_team} {home_score} ({status})"
 
-    return f"{full_away} {away_score} - {full_home} {home_score} ({status})"
+        return f"The {full_name} are not currently playing."
+    
+    except Exception as e:
+        return f"Error fetching score: {e}"
+
+print(get_record("Lakers"))
+print(get_score("Lakers"))
