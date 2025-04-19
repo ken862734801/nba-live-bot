@@ -1,6 +1,5 @@
 import asyncio
 import json
-
 import aiohttp
 import websockets
 
@@ -31,7 +30,7 @@ class Bot:
         self.command_handler.register_command("record", record_command)
         self.command_handler.register_command("score", score_command)
     
-    async def get_auth(self):
+    async def validate_token(self):
         url = "https://id.twitch.tv/oauth2/validate"
         headers = {"Authorization": f"OAuth {self.oauth_token}"}
         async with aiohttp.ClientSession() as session:
@@ -110,7 +109,7 @@ class Bot:
                 await self.command_handler.handle(user, text)
 
     async def run(self):
-        await self.get_auth()
+        await self.validate_token()
         async with websockets.connect(self.ws_url) as ws:
             async for message in ws:
                 await self.handle_ws_message(message)
