@@ -17,7 +17,7 @@ BOT_ID = os.getenv("TWITCH_BOT_ID")
 URL = os.getenv("SUPABASE_URL")
 KEY = os.getenv("SUPABASE_KEY")
 
-sb: Client = create_client(URL, KEY)
+SB: Client = create_client(URL, KEY)
 
 class Bot(commands.Bot):
     def __init__(self) -> None:
@@ -33,7 +33,7 @@ class Bot(commands.Bot):
         await self.add_component(CommandComponent(self))
         await self.load_tokens()
 
-        response = sb.table("channels").select("broadcaster_user_id").execute()
+        response = SB.table("channels").select("broadcaster_user_id").execute()
         channels = [record["broadcaster_user_id"] for record in response.data]
 
         for channel in channels:
@@ -43,7 +43,7 @@ class Bot(commands.Bot):
     async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
             response = await super().add_token(token, refresh)
 
-            await sb.table("tokens") \
+            await SB.table("application_tokens") \
                 .upsert({
                     "user_id": response.user_id,
                     "access_token": token,
@@ -54,7 +54,7 @@ class Bot(commands.Bot):
             return response
 
     async def load_tokens(self) -> None:
-        response = sb.table("tokens").select("*").execute()
+        response = SB.table("application_tokens").select("*").execute()
         for row in response.data:
             await super().add_token(row["access_token"], row["refresh_token"])
 

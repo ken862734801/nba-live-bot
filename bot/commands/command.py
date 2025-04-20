@@ -8,9 +8,11 @@ class CommandComponent(commands.Component):
     
     @commands.Component.listener()
     async def event_message(self, payload: twitchio.ChatMessage) -> None:
-        print(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")
+        if payload.text.startswith('!'):
+            print(f"[{payload.broadcaster.name}] - {payload.chatter.name}: {payload.text}")
 
     @commands.command(name="score")
+    @commands.cooldown(rate=1, per=2.5, key=commands.BucketType.channel)
     async def score(self, ctx: commands.Context) -> None:
         text = ctx.message.text.split(" ", 1)
         if len(text) < 2:
@@ -18,12 +20,9 @@ class CommandComponent(commands.Component):
             return
         team_name = text[1].strip()
         await ctx.send(f"@{ctx.author.name} {NBAService.get_game_score(team_name)}")
-        
-    # @commands.command(name="boxscore")
-    # async def boxscore(self, ctx: commands.Context) -> None:
-    #     await ctx.send("Boxscore command executed!")
     
     @commands.command(name="record")
+    @commands.cooldown(rate=1, per=2.5, key=commands.BucketType.channel)
     async def record(self, ctx: commands.Context) -> None:
         text = ctx.message.text.split(" ", 1)
         if len(text) < 2:
@@ -32,6 +31,3 @@ class CommandComponent(commands.Component):
         team_name = text[1].strip()
         await ctx.send(f"@{ctx.author.name} {NBAService.get_team_record(team_name)}")
     
-    # @commands.command(name="career")
-    # async def career(self, ctx: commands.Context) -> None:
-    #     await ctx.send("Career command executed!")
