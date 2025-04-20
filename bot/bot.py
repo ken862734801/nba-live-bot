@@ -33,7 +33,7 @@ class Bot(commands.Bot):
         await self.add_component(CommandComponent(self))
         await self.load_tokens()
 
-        response = SB.table("channels").select("broadcaster_user_id").execute()
+        response = SB.table("channels").select("broadcaster_user_id").eq("is_active", True).execute()
         channels = [record["broadcaster_user_id"] for record in response.data]
 
         for channel in channels:

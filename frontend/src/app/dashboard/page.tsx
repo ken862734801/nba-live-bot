@@ -22,11 +22,11 @@ export default function Dashboard() {
 
       const { data: channel } = await supabase
         .from('channels')
-        .select('*')
+        .select('is_active')
         .eq('broadcaster_user_id', userId)
         .single()
 
-      setisActive(!!channel)
+      setisActive(!!channel?.is_active)
       setLoading(false)
     }
 
@@ -34,18 +34,18 @@ export default function Dashboard() {
   }, [session, user, supabase, router])
 
   const handleJoin = async () => {
-    const userId = user?.user_metadata?.provider_id
-    if (!userId) return
+    const metadata = user?.user_metadata
+    if (!metadata) return
 
-    await supabase.from('channels').upsert({ broadcaster_user_id: userId })
+    await supabase.from('channels').upsert({ broadcaster_user_id: metadata.provider_id, user_name: metadata.full_name, is_active: true, updated_at: new Date().toISOString()})
     setisActive(true)
   }
 
   const handleLeave = async () => {
-    const userId = user?.user_metadata?.provider_id
-    if (!userId) return
+    const metadata = user?.user_metadata
+    if (!metadata) return
     
-    await supabase.from('channels').delete().eq('broadcaster_user_id', userId)
+    await supabase.from('channels').update({is_active: false, updated_at: new Date().toISOString()}).eq('broadcaster_user_id', metadata.provider_id)
     setisActive(false) 
   }
 
