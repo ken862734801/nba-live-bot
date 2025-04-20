@@ -52,3 +52,4 @@ class NBAService:
             
         except Exception as e:
             return f'Error: {e}'
+            
