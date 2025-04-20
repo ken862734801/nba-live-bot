@@ -68,7 +68,7 @@ def main() -> None:
     try:
         asyncio.run(runner())
     except KeyboardInterrupt:
-        print("Bot stopped.")
+        print("KeyboardInterrupt: Stopping bot.")
 
 if __name__ == "__main__":
     main()
