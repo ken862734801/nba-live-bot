@@ -40,7 +40,7 @@ class Bot(commands.Bot):
         for row in rows:
             await subscribe_to_twitch_chat(self, row["broadcaster_user_id"])
 
-    async def add_bot_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
+    async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
         response = await super().add_token(token, refresh)
 
         await self.sb.table("credentials").upsert({
@@ -51,7 +51,7 @@ class Bot(commands.Bot):
 
         return response
 
-    async def load_bot_tokens(self) -> None:
+    async def load_tokens(self) -> None:
         response = self.sb.table("credentials").select("*").execute()
         for row in response.data:
             await super().add_token(row["access_token"], row["refresh_token"])
