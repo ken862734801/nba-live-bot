@@ -9,7 +9,7 @@ class NBAService:
     
     @staticmethod
     def _get_team_info(name):
-        name_lower = name.lower()
+        name_lower = name.lower().strip()
         for team in NBAService._all_teams():
             if (
                 name_lower == team["full_name"].lower() or
