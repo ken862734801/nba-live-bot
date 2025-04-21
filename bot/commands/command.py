@@ -1,6 +1,6 @@
 import twitchio
 from twitchio.ext import commands
-from services.nba_api_service import NBAService
+from services.nba import NBAService
 
 class CommandComponent(commands.Component):
     def __init__(self, bot: commands.Bot):
