@@ -30,7 +30,7 @@ class RealtimeListener:
             print(f"Subscribing to {row["broadcaster_user_id"]}")
             await subscribe_to_twitch_chat(self.bot, broadcaster_user_id)
         else:
-            print(f"Unsubscribing from {row["broadcaster_user_id]}")
+            print(f"Unsubscribing to {row["broadcaster_user_id"]}")
             await unsubscribe_from_twitch_chat(self.bot, broadcaster_user_id)
 
     async def on_row_insert(self, payload):
