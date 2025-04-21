@@ -23,7 +23,7 @@ class NBAService:
     def get_team_record(name):
         data = NBAService._get_team_info(name)
         if not data:
-            return f"Team not found: {name}."
+            return f"Team not found: {name}"
 
         try:
             df = teamgamelog.TeamGameLog(team_id=data["id"]).get_data_frames()[0]
@@ -37,7 +37,7 @@ class NBAService:
     def get_game_score(name):
         data = NBAService._get_team_info(name)
         if not data:
-            return f"Team not found: {name}."
+            return f"Team not found: {name}"
         try:
             games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
             for game in games:
