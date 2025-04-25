@@ -20,6 +20,14 @@ class CommandComponent(commands.Component):
             return
         team_name = text[1].strip()
         await ctx.send(f"@{ctx.author.name} {NBAService.get_game_score(team_name)}")
+
+    @commands.command(name="stats")
+    async def boxscore(self, ctx: commands.Context) -> None:
+        text = ctx.message.text.split(" ", 1)
+        if len(text) < 2:
+            return
+        player_name = text[1].strip()
+        await ctx.send(f"@{ctx.author.name} {NBAService.get_player_statline(player_name)}")
     
     @commands.command(name="record")
     @commands.cooldown(rate=1, per=2.5, key=commands.BucketType.channel)
@@ -30,4 +38,5 @@ class CommandComponent(commands.Component):
             return
         team_name = text[1].strip()
         await ctx.send(f"@{ctx.author.name} {NBAService.get_team_record(team_name)}")
+
     

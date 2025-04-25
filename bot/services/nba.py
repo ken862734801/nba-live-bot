@@ -1,8 +1,20 @@
-from nba_api.stats.static import teams
-from nba_api.stats.endpoints import teamgamelog
+from nba_api.stats.static import players, teams
+from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 
+# all_players = players.get_players()
+# print("Searching for:", "LeBron James")
+# print([p["full_name"] for p in all_players if "lebron james" in p["full_name"].lower()])
+
 class NBAService:
+    @staticmethod
+    def _get_player_info(name):
+        name_lower = name.lower().strip()
+        for player in players.get_players():
+            if player["full_name"].lower() == name_lower:
+                return player
+        return None
+
     @staticmethod
     def _all_teams():
         return teams.get_teams()
@@ -52,3 +64,44 @@ class NBAService:
             
         except Exception as e:
             return f'Error: {e}'
+    
+    @staticmethod
+    def get_player_statline(player_name: str) -> str:
+        """
+        Return a one-liner with the player’s live box-score.
+        Example: “LeBron James: 28 PTS (11/20 FG 55.0%), 12 REB, 9 AST, 3 STL, 1 BLK in 35 MIN”
+        """
+        try:
+            name_key = player_name.lower().strip()
+
+            games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+            for game in games:
+                data = boxscore.BoxScore(game_id=game["gameId"]).get_dict()["game"]
+
+                for side in ("homeTeam", "awayTeam"):
+                    for p in data[side]["players"]:
+                        if p["name"].lower() == name_key:
+                            s = p["statistics"]
+                            # define all the vars you use below
+                            pts    = s["points"]
+                            reb    = s["reboundsTotal"]
+                            ast    = s["assists"]
+                            stl    = s["steals"]
+                            blk    = s["blocks"]
+                            raw_min = s["minutes"]             # "PT29M33.00S"
+                            minp = int(raw_min.split("PT")[1].split("M")[0])
+                            fgm    = s["fieldGoalsMade"]
+                            fga    = s["fieldGoalsAttempted"]
+                            fg_pct = s["fieldGoalsPercentage"] * 100
+                            print(minp)
+                            return (
+                                f"{p['name']}: "
+                                f"{pts} PTS ({fgm}/{fga} FG {fg_pct:.1f}%), "
+                                f"{reb} REB, {ast} AST, "
+                                f"{stl} STL, {blk} BLK "
+                                f"in {minp} MIN"
+                            )
+
+            return f"{player_name} is not currently playing."
+        except Exception as e:
+            return f"Error: {e}"

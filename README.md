@@ -1,2 +1,2 @@
-# NBALiveBot
+# BoxScoreBot
 A twitch bot. 
