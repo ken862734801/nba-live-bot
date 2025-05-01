@@ -2,7 +2,7 @@ import os
 import asyncio
 from realtime import AsyncRealtimeClient
 from services.supabase import get_supabase_websocket_url
-from services.eventsub import subscribe_to_twitch_chat, unsubscribe_from_twitch_chat
+from services.eventsub import subscribe_to_websocket, unsubscribe_from_websocket
 
 class RealtimeListener:
     def __init__(self, bot):
@@ -28,13 +28,13 @@ class RealtimeListener:
 
         if row["is_active"]:
             print(f"Subscribing to {row["broadcaster_user_id"]}")
-            await subscribe_to_twitch_chat(self.bot, broadcaster_user_id)
+            await subscribe_to_websocket(self.bot, broadcaster_user_id)
         else:
             print(f"Unsubscribing to {row["broadcaster_user_id"]}")
-            await unsubscribe_from_twitch_chat(self.bot, broadcaster_user_id)
+            await unsubscribe_from_websocket(self.bot, broadcaster_user_id)
 
     async def on_row_insert(self, payload):
         row = payload["data"]["record"]
         if row["is_active"]:
             print(f"Subscribing to {row["broadcaster_user_id"]}")
-            await subscribe_to_twitch_chat(self.bot, row["broadcaster_user_id"])
+            await subscribe_to_websocket(self.bot, row["broadcaster_user_id"])

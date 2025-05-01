@@ -10,7 +10,7 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 SB: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 WS_URL = SUPABASE_URL.replace("https", "wss") + "/realtime/v1"
 
-def _get_supabase_client() -> Client:
+def get_supabase_client() -> Client:
     return SB
 
 def get_supabase_websocket_url() -> str:

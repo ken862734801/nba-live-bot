@@ -1,63 +1,51 @@
 import os
 import asyncio
-import twitchio
+import logging
 
+import twitchio
 from twitchio import eventsub
 from twitchio.ext import commands
-from supabase import create_client, Client
+
+from config import Config
 from commands.command import CommandComponent
 from services.realtime import RealtimeListener
-from services.supabase import _get_supabase_client
-from services.eventsub import subscribe_to_twitch_chat
+from services.supabase import get_supabase_client
+from services.eventsub import subscribe_to_websocket
 
-from dotenv import load_dotenv
-
-load_dotenv()
-
-CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
-CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
-BOT_ID = os.getenv("TWITCH_BOT_ID")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 
 class Bot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(
-            client_id=CLIENT_ID,
-            client_secret=CLIENT_SECRET,
-            bot_id=BOT_ID,
+            client_id=Config.CLIENT_ID,
+            client_secret=Config.CLIENT_SECRET,
+            bot_id=Config.BOT_ID,
             prefix="!",
         )
-        self.sb = _get_supabase_client()
-        self.listener = RealtimeListener(self)
+        self.supabase_client = get_supabase_client()
+        self.realtime_listener = RealtimeListener(self)
 
     async def setup_hook(self) -> None:
         await self.add_component(CommandComponent(self))
         await self.load_tokens()
-        await self.subscribe_to_active_rows()
-        await self.listener.start()
+        await self.join_active_channels()
+        await self.realtime_listener.start()
 
-    async def subscribe_to_active_rows(self) -> None:
-        rows = self.sb.table("channels").select("broadcaster_user_id").eq("is_active", True).execute().data
+    async def join_active_channels(self) -> None:
+        rows = self.supabase_client.table("channels").select("broadcaster_user_id").eq("is_active", True).execute().data
         for row in rows:
-            await subscribe_to_twitch_chat(self, row["broadcaster_user_id"])
-
-    async def add_token(self, token: str, refresh: str) -> twitchio.authentication.ValidateTokenPayload:
-        response = await super().add_token(token, refresh)
-
-        await self.sb.table("credentials").upsert({
-            "user_id": response.user_id,
-            "access_token": token,
-            "refresh_token": refresh
-        }, on_conflict="user_id").execute()
-
-        return response
+            broadcaster_user_id = row.get("broadcaster_user_id")
+            if broadcaster_user_id:
+                await subscribe_to_websocket(self, broadcaster_user_id)
+                logging.info("Subscribed to chat for broadcaster ID: %s", broadcaster_user_id)
+            else:
+                logging.warning("Row missing 'broadcaster_user_id': %s", row)
 
     async def load_tokens(self) -> None:
-        response = self.sb.table("credentials").select("*").execute()
-        for row in response.data:
-            await super().add_token(row["access_token"], row["refresh_token"])
+        await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
 
     async def event_ready(self) -> None:
-        print("Bot is online!")
+        logging.info("The bot has connected to Twitch")
 
 def main() -> None:
     async def runner() -> None:
@@ -65,7 +53,7 @@ def main() -> None:
         try:
             await bot.start()
         finally:
-            await bot.listener.client.close()
+            await bot.realtime_listener.client.close()
     asyncio.run(runner())
 
 if __name__ == "__main__":
