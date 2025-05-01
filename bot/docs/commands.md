@@ -1,8 +1,8 @@
-# 📘 Bot Commands Documentation
+# NBALiveBot Commands
 
-This bot provides real-time NBA statistics and information. Below is a list of available commands, their usage, and example outputs.
+This bot provides real-time NBA statistics. Below is a list of available commands, their usage, and example outputs.
 
-## 📊 `!record`
+## `!record`
 
 **Description**: Get the current season win-loss record for an NBA team.
 
@@ -13,17 +13,17 @@ This bot provides real-time NBA statistics and information. Below is a list of a
 
 **Example**:
 ```
-!record Lakers
+!record Lakers or !record LAL or !record Los Angeles Lakers
 ```
 
 **Bot Response**:
 ```
-@user Lakers are currently 45-29 (3rd in Western Conference).
+@username The Los Angeles Lakers are 50 - 32
 ```
 
 ---
 
-## 🏀 `!score`
+## `!score`
 
 **Description**: Check the current game score for an NBA team if they are playing today.
 
@@ -34,22 +34,17 @@ This bot provides real-time NBA statistics and information. Below is a list of a
 
 **Example**:
 ```
-!score Celtics
+!score Celtics or !score BOS or !score Boston Celtics
 ```
 
-**Bot Response (if playing)**:
+**Bot Response**:
 ```
-@user Celtics are leading the Knicks 102-95 with 3:45 left in the 4th quarter.
-```
-
-**Bot Response (if not playing)**:
-```
-@user The Celtics are not currently playing.
+@username Boston Celtics 120 - Orlando Magic 89 (Final)
 ```
 
 ---
 
-## 📈 `!stats`
+## `!stats`
 
 **Description**: Get the latest game stat line for a specific NBA player.
 
@@ -60,24 +55,32 @@ This bot provides real-time NBA statistics and information. Below is a list of a
 
 **Example**:
 ```
-!stats Kevin Durant
+!stats Anthony Edwards
 ```
 
 **Bot Response**:
 ```
-@user Kevin Durant: 29 PTS, 8 REB, 5 AST, 2 STL, 1 BLK (Final)
+@username Anthony Edwards: 29 PTS, 8 REB, 5 AST, 2 STL, 1 BLK (Final)
 ```
 
 ---
 
-## 🆘 `!help`
+## `!commands`
 
 **Description**: Provides a link to the full list of available bot commands.
 
 **Usage**:
+```
+!commands
+```
+
+**Bot Response**:
+```
+@username https://github.com/ken862734801/nba-live-bot/blob/main/bot/docs/commands.md
+```
 
 ---
 
-## ⏱ Cooldown
+## Cooldown
 
 All commands have a **per-channel cooldown** of 5 seconds to prevent spam.

@@ -1,6 +1,13 @@
+import logging
+
 from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 
 class NBAService:
 
@@ -11,14 +18,18 @@ class NBAService:
     @staticmethod
     def _get_player_info(name):
         name_lower = name.lower().strip()
+        logging.debug(f"Searching for player: {name_lower}")
         for player in players.get_players():
             if player["full_name"].lower() == name_lower:
+                logging.info(f"Player found: {player['full_name']}")
                 return player
+        logging.warning(f"Player not found: {name}")
         return None
         
     @staticmethod
     def _get_team_info(name):
         name_lower = name.lower().strip()
+        logging.debug(f"Searching for team: {name_lower}")
         for team in NBAService._all_teams():
             if (
                 name_lower == team["full_name"].lower() or
@@ -26,6 +37,7 @@ class NBAService:
                 name_lower == team["abbreviation"].lower()
             ):
                 return team
+        logging.warning(f"Team not found: {name}")
         return None
     
     @staticmethod
@@ -42,7 +54,7 @@ class NBAService:
                     home_name = f"{home_team['teamCity']} {home_team['teamName']}"
                     box_score = boxscore.BoxScore(game_id=game["gameId"]).get_dict()["game"]
                     status = box_score["gameStatusText"]
-                    return f"{away_name} {box_score['awayTeam']['score']} - {home_name} {box_score['homeTeam']['score']} ({status})"
+                    return f"{away_name} {box_score['awayTeam']['score']} - {home_name} {box_score['homeTeam']['score']} ({status})."
             return f"The {data['full_name']} are not currently playing."
             
         except Exception as e:

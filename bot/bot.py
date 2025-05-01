@@ -45,7 +45,7 @@ class Bot(commands.Bot):
         await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
 
     async def event_ready(self) -> None:
-        logging.info("The bot has connected to Twitch")
+        logging.info(f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands")
 
 def main() -> None:
     async def runner() -> None:
