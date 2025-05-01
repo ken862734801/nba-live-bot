@@ -1,13 +1,16 @@
 import os
 import asyncio
+
 from realtime import AsyncRealtimeClient
+
+from config import Config
 from services.supabase import get_supabase_websocket_url
 from services.eventsub import subscribe_to_websocket, unsubscribe_from_websocket
 
 class RealtimeListener:
     def __init__(self, bot):
         self.bot = bot
-        self.client = AsyncRealtimeClient(get_supabase_websocket_url(), os.getenv("SUPABASE_KEY"), auto_reconnect=True)
+        self.client = AsyncRealtimeClient(get_supabase_websocket_url(), Config.SUPABASE_KEY, auto_reconnect=True)
     
     async def start(self):
         await self.client.connect()
@@ -21,7 +24,7 @@ class RealtimeListener:
     
     async def _start_heartbeat_loop(self):
         while True:
-            await asyncio.sleep(1)
+            await asyncio.sleep(60)
 
     async def on_row_update(self, payload):
         row = payload["data"]["record"]

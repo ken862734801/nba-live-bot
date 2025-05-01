@@ -1,14 +1,10 @@
 import os
+
+from config import Config
 from supabase import create_client, Client
-from dotenv import load_dotenv
 
-load_dotenv()
-
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-SB: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-WS_URL = SUPABASE_URL.replace("https", "wss") + "/realtime/v1"
+SB: Client = create_client(Config.SUPABASE_URL, Config.SUPABASE_KEY)
+WS_URL = Config.SUPABASE_URL.replace("https", "wss") + "/realtime/v1"
 
 def get_supabase_client() -> Client:
     return SB
