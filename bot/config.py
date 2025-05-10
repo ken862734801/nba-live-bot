@@ -1,11 +1,8 @@
 import os
 
 from dotenv import load_dotenv
-from pathlib import Path
 
-env_path = Path(__file__).parent / ".env"
-load_dotenv(env_path)
-
+load_dotenv()
 
 class Config:
     BOT_ID = os.getenv("TWITCH_BOT_ID")
@@ -13,7 +10,8 @@ class Config:
     CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
     CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
     DOCUMENTATION_URL = os.getenv("DOCUMENTATION_URL")
-    SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-    SUPABASE_URL = os.getenv("SUPABASE_URL")
+    SUPABASE_KEY= os.getenv("SUPABASE_KEY")
+    SUPABASE_URL= os.getenv("SUPABASE_URL")
     TWITCH_ACCESS_TOKEN = os.getenv("TWITCH_ACCESS_TOKEN")
-    TWITCH_REFRESH_TOKEN = os.getenv("TWITCH_REFRESH_TOKEN")
+    TWITCH_REFRESH_TOKEN = os.getenv("TWITCH_REFRESH_TOKEN")    
+    

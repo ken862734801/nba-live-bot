@@ -60,8 +60,6 @@ def main() -> None:
             await bot.start()
         finally:
             await bot.realtime_listener.client.close()
-    print("ENV TOKEN: ", os.getenv("TWITCH_ACCESS_TOKEN"))
-    print("CONFIG TOKEN: ", Config.TWITCH_ACCESS_TOKEN)
     asyncio.run(runner())
 
 
