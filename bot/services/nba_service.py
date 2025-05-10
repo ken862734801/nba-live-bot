@@ -1,11 +1,8 @@
-import logging
 import datetime
-
 from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 
-logging = logging.getLogger(__name__)
 
 class NBAService:
 
@@ -16,18 +13,14 @@ class NBAService:
     @staticmethod
     def _get_player_data(name):
         name_lower = name.lower().strip()
-        logging.info(f"Searching for player: {name_lower}")
         for player in players.get_players():
             if player["full_name"].lower() == name_lower:
-                logging.info(f"Player found: {player['full_name']}")
                 return player
-        logging.warning(f"Player not found: {name}")
         return None
 
     @staticmethod
     def _get_team_data(name):
         name_lower = name.lower().strip()
-        logging.debug(f"Searching for team: {name_lower}")
         for team in NBAService._all_teams():
             if (
                 name_lower == team["full_name"].lower() or
@@ -35,7 +28,6 @@ class NBAService:
                 name_lower == team["abbreviation"].lower()
             ):
                 return team
-        logging.warning(f"Team not found: {name}")
         return None
 
     @staticmethod
@@ -85,7 +77,7 @@ class NBAService:
                 (total_field_goals_made / total_field_goals_attempted) * 100, 1
             )
 
-            return f"{player["full_name"]}: {average_points} PTS, {average_rebounds} REB, {average_assists} AST, {average_field_goal_percentage}%"
+            return f"{player['full_name']}: {average_points} PTS, {average_rebounds} REB, {average_assists} AST, {average_field_goal_percentage}%"
         except Exception as e:
             return f"Error: {e}"
 
@@ -97,22 +89,17 @@ class NBAService:
 
             for game in games:
                 game_id = game["gameId"]
-                logging.info(f"Checking game ID: {game_id}")
 
                 try:
                     box = boxscore.BoxScore(game_id=game_id)
                     data = box.get_dict()["game"]
                 except Exception as e:
-                    logging.warning(
-                        f"Failed to fetch box score for {game_id}: {e}")
                     continue
 
                 for side in ("homeTeam", "awayTeam"):
                     for player in data[side]["players"]:
                         if player["name"].lower() == name_key:
                             if "statistics" not in player:
-                                logging.info(
-                                    f"{player_name} has no statistics logged yet.")
                                 continue
 
                             s = player["statistics"]

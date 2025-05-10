@@ -1,19 +1,12 @@
 import os
 import asyncio
-import logging
-
 from supabase import create_client, Client
 from twitchio import eventsub
 from twitchio.ext import commands
-
 from config import Config
 from commands import CommandComponent
 from services.realtime_listener import RealtimeListener
 from services.twitch.eventsub import subscribe_to_websocket
-
-logging.basicConfig(level=logging.INFO,
-                    format="%(asctime)s [%(levelname)s] %(message)s")
-
 
 class Bot(commands.Bot):
     def __init__(self) -> None:
@@ -40,17 +33,14 @@ class Bot(commands.Bot):
             broadcaster_user_id = row.get("broadcaster_user_id")
             if broadcaster_user_id:
                 await subscribe_to_websocket(self, broadcaster_user_id)
-                logging.info(
-                    "Subscribed to chat for broadcaster ID: %s", broadcaster_user_id)
             else:
-                logging.warning("Row missing 'broadcaster_user_id': %s", row)
+                print("Row missing 'broadcaster_user_id':", row)
 
     async def load_tokens(self) -> None:
         await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
 
     async def event_ready(self) -> None:
-        logging.info(
-            f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands")
+        print(f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands")
 
 
 def main() -> None:
