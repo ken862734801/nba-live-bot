@@ -16,7 +16,7 @@ export default function Callback() {
 
   return (
     <main>
-      <p>Loading...</p>
+      <p>Redirecting...</p>
     </main>
   )
 }
