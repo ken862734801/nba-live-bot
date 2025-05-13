@@ -3,7 +3,7 @@ import threading
 from config import Config
 
 
-class ProxyMananger:
+class ProxyManager:
     def __init__(self):
         self.raw_list = Config.PROXY_LIST or ""
         self.proxy_list = [p.strip()
@@ -18,10 +18,10 @@ class ProxyMananger:
             return None
 
         with self._lock:
-            curr = self.proxy_list[self.index]
+            current_proxy = self.proxy_list[self.index]
             self.index = (self.index + 1) % len(self.proxy_list)
-        url = f"http://{self.username}:{self.password}@{curr}"
-        return {"http": url, "https": url}
+        url = f"http://{self.username}:{self.password}@{current_proxy}"
+        return url
 
 
 proxy_manager = ProxyManager()

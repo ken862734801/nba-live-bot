@@ -37,9 +37,9 @@ class NBAService:
         data = NBAService._get_team_data(name)
         if not data:
             return f"Team not found: {name}"
-        proxies = proxy_manager.get_proxy()
+        proxy = proxy_manager.get_proxy()
         try:
-            _scoreboard = scoreboard.ScoreBoard(proxies=proxies) if proxy else scoreboard.ScoreBoard()
+            _scoreboard = scoreboard.ScoreBoard(proxy=proxy) if proxy else scoreboard.ScoreBoard()
             games = _scoreboard.get_dict()["scoreboard"]["games"]
             for game in games:
                 home_team, away_team = game["homeTeam"], game["awayTeam"]
