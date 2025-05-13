@@ -58,33 +58,33 @@ class NBAService:
 
     # @staticmethod
     # def get_player_career_averages(player_name: str) -> str:
-        name_lower = player_name.lower().strip()
-        player = NBAService._get_player_data(name_lower)
-        if not player:
-            return f"Player not found: {player_name}"
-        try:
-            career = playercareerstats.PlayerCareerStats(
-                player_id=player["id"])
-            df = career.get_data_frames()[0]
-            if df.empty:
-                return f"No career statistics found for {player_name}"
-            games_played = df["GP"].sum()
-            total_points = df["PTS"].sum()
-            total_rebounds = df["REB"].sum()
-            total_assists = df["AST"].sum()
-            total_field_goals_attempted = df["FGA"].sum()
-            total_field_goals_made = df["FGM"].sum()
+        # name_lower = player_name.lower().strip()
+        # player = NBAService._get_player_data(name_lower)
+        # if not player:
+        #     return f"Player not found: {player_name}"
+        # try:
+        #     career = playercareerstats.PlayerCareerStats(
+        #         player_id=player["id"])
+        #     df = career.get_data_frames()[0]
+        #     if df.empty:
+        #         return f"No career statistics found for {player_name}"
+        #     games_played = df["GP"].sum()
+        #     total_points = df["PTS"].sum()
+        #     total_rebounds = df["REB"].sum()
+        #     total_assists = df["AST"].sum()
+        #     total_field_goals_attempted = df["FGA"].sum()
+        #     total_field_goals_made = df["FGM"].sum()
 
-            average_points = round(total_points / games_played, 1)
-            average_rebounds = round(total_rebounds / games_played, 1)
-            average_assists = round(total_assists / games_played, 1)
-            average_field_goal_percentage = round(
-                (total_field_goals_made / total_field_goals_attempted) * 100, 1
-            )
+        #     average_points = round(total_points / games_played, 1)
+        #     average_rebounds = round(total_rebounds / games_played, 1)
+        #     average_assists = round(total_assists / games_played, 1)
+        #     average_field_goal_percentage = round(
+        #         (total_field_goals_made / total_field_goals_attempted) * 100, 1
+        #     )
 
-            return f"{player['full_name']}: {average_points} PTS, {average_rebounds} REB, {average_assists} AST, {average_field_goal_percentage}%"
-        except Exception as e:
-            return f"Error: {e}"
+        #     return f"{player['full_name']}: {average_points} PTS, {average_rebounds} REB, {average_assists} AST, {average_field_goal_percentage}%"
+        # except Exception as e:
+        #     return f"Error: {e}"
 
     @staticmethod
     def get_player_statline(player_name: str) -> str:
@@ -140,18 +140,18 @@ class NBAService:
 
     # @staticmethod
     # def get_team_record(name):
-        data = NBAService._get_team_data(name)
-        if not data:
-            return f"Team not found: {name}"
+        # data = NBAService._get_team_data(name)
+        # if not data:
+        #     return f"Team not found: {name}"
 
-        try:
-            df = teamgamelog.TeamGameLog(
-                team_id=data["id"]).get_data_frames()[0]
-            wins, losses = df.iloc[0]["W"], df.iloc[0]["L"]
-            return f"The {data['full_name']} are {wins} - {losses}"
+        # try:
+        #     df = teamgamelog.TeamGameLog(
+        #         team_id=data["id"]).get_data_frames()[0]
+        #     wins, losses = df.iloc[0]["W"], df.iloc[0]["L"]
+        #     return f"The {data['full_name']} are {wins} - {losses}"
 
-        except Exception as e:
-            return f'Error: {e}'
+        # except Exception as e:
+        #     return f'Error: {e}'
 
     @staticmethod
     def get_schedule() -> str:
