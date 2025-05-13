@@ -10,6 +10,7 @@ class Config:
     CLIENT_ID = os.getenv("TWITCH_CLIENT_ID")
     CLIENT_SECRET = os.getenv("TWITCH_CLIENT_SECRET")
     DOCUMENTATION_URL = os.getenv("DOCUMENTATION_URL")
+    PROXY = os.getenv("PROXY")
     SUPABASE_KEY= os.getenv("SUPABASE_KEY")
     SUPABASE_URL= os.getenv("SUPABASE_URL")
     TWITCH_ACCESS_TOKEN = os.getenv("TWITCH_ACCESS_TOKEN")
