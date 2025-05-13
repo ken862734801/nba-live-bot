@@ -3,6 +3,8 @@ from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 
+from utils import proxy_manager
+
 
 class NBAService:
 
@@ -35,8 +37,10 @@ class NBAService:
         data = NBAService._get_team_data(name)
         if not data:
             return f"Team not found: {name}"
+        proxies = proxy_manager.get_proxy()
         try:
-            games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+            _scoreboard = scoreboard.ScoreBoard(proxies=proxies) if proxy else scoreboard.ScoreBoard()
+            games = _scoreboard.get_dict()["scoreboard"]["games"]
             for game in games:
                 home_team, away_team = game["homeTeam"], game["awayTeam"]
                 if home_team["teamId"] == data["id"] or away_team["teamId"] == data["id"]:

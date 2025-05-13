@@ -1,12 +1,15 @@
 import os
 import asyncio
+
 from supabase import create_client, Client
 from twitchio import eventsub
 from twitchio.ext import commands
+
 from config import Config
 from commands import CommandComponent
 from services.realtime_listener import RealtimeListener
 from services.twitch.eventsub import subscribe_to_websocket
+
 
 class Bot(commands.Bot):
     def __init__(self) -> None:
