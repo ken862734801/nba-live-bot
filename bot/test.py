@@ -10,4 +10,4 @@ def with_proxy(proxy: str):
         print(f"THE PROXY DOES NOT WORK! {e}")
 
 if __name__ == "__main__":
-    with_proxy(config.PROXY)
+    with_proxy(Config.PROXY)
