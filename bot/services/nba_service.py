@@ -39,7 +39,8 @@ class NBAService:
             return f"Team not found: {name}"
         proxy = proxy_manager.get_proxy()
         try:
-            _scoreboard = scoreboard.ScoreBoard(proxy=proxy) if proxy else scoreboard.ScoreBoard()
+            _scoreboard = scoreboard.ScoreBoard(
+                proxy=proxy) if proxy else scoreboard.ScoreBoard()
             games = _scoreboard.get_dict()["scoreboard"]["games"]
             for game in games:
                 home_team, away_team = game["homeTeam"], game["awayTeam"]
@@ -55,8 +56,8 @@ class NBAService:
         except Exception as e:
             return f'Error: {e}'
 
-    @staticmethod
-    def get_player_career_averages(player_name: str) -> str:
+    # @staticmethod
+    # def get_player_career_averages(player_name: str) -> str:
         name_lower = player_name.lower().strip()
         player = NBAService._get_player_data(name_lower)
         if not player:
@@ -87,9 +88,12 @@ class NBAService:
 
     @staticmethod
     def get_player_statline(player_name: str) -> str:
+        proxy = proxy_manager.get_proxy()
         try:
-            name_key = player_name.lower().strip()
-            games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+            name_key = player_name.lower()
+            _scoreboard = scoreboard.ScoreBoard(
+                proxy=proxy) if proxy else scoreboard.ScoreBoard()
+            games = _scoreboard.get_dict()["scoreboard"]["games"]
 
             for game in games:
                 game_id = game["gameId"]
@@ -134,8 +138,8 @@ class NBAService:
         except Exception as e:
             return f"Error: {e}"
 
-    @staticmethod
-    def get_team_record(name):
+    # @staticmethod
+    # def get_team_record(name):
         data = NBAService._get_team_data(name)
         if not data:
             return f"Team not found: {name}"
@@ -151,7 +155,10 @@ class NBAService:
 
     @staticmethod
     def get_schedule() -> str:
-        games = scoreboard.ScoreBoard().get_dict()["scoreboard"]["games"]
+        proxy = proxy_manager.get_proxy()
+        _scoreboard = scoreboard.ScoreBoard(
+            proxy=proxy) if proxy else scoreboard.ScoreBoard()
+        games = _scoreboard.get_dict()["scoreboard"]["games"]
         if not games:
             return "No games scheduled."
 

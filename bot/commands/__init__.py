@@ -12,32 +12,32 @@ class CommandComponent(commands.Component):
         self.bot = bot
 
     async def _parse_message(self, ctx: commands.Context, error: str) -> str | None:
-        parts = ctx.message.text.strip().split(" ", 1)
+        parts = ctx.message.text.split(maxsplit=1)
         if len(parts) < 2:
             await ctx.send(f"@{ctx.author.name}, {error}")
             return None
-        return parts[1].strip()
+        return parts[1]
 
-    @commands.command(name="career")
-    @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
-    async def career(self, ctx: commands.Context) -> None:
-        player = await self._parse_message(ctx, "provide a player name.")
-        if player is None:
-            return
-        await ctx.send(f"@{ctx.author.name} {NBAService.get_player_career_averages(player)}")
+    # @commands.command(name="career")
+    # @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
+    # async def career(self, ctx: commands.Context) -> None:
+    #     player = await self._parse_message(ctx, "provide a player name.")
+    #     if player is None:
+    #         return
+    #     await ctx.send(f"@{ctx.author.name} {NBAService.get_player_career_averages(player)}")
 
     @commands.command(name="commands")
     @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
     async def documentation(self, ctx: commands.Context) -> None:
         await ctx.send(f"@{ctx.author.name}, {Config.DOCUMENTATION_URL}")
 
-    @commands.command(name="record")
-    @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
-    async def record(self, ctx: commands.Context) -> None:
-        team = await self._parse_message(ctx, "provide a team name.")
-        if team is None:
-            return
-        await ctx.send(f"@{ctx.author.name} {NBAService.get_team_record(team)}")
+    # @commands.command(name="record")
+    # @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
+    # async def record(self, ctx: commands.Context) -> None:
+    #     team = await self._parse_message(ctx, "provide a team name.")
+    #     if team is None:
+    #         return
+    #     await ctx.send(f"@{ctx.author.name} {NBAService.get_team_record(team)}")
 
     @commands.command(name="score")
     @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)

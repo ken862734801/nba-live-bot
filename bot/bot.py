@@ -43,7 +43,7 @@ class Bot(commands.Bot):
         await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
 
     async def event_ready(self) -> None:
-        print(f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands")
+        print(f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands.")
 
 
 def main() -> None:
