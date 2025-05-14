@@ -1,0 +1,67 @@
+import datetime
+
+
+def _convert_utc_to_est(utc_str: str) -> datetime.datetime | None:
+    """Parse a UTC timestamp string and convert to EST datetime, or return None on failure."""
+    try:
+        utc_dt = datetime.datetime.strptime(utc_str, "%Y-%m-%dT%H:%M:%SZ")
+        return utc_dt - datetime.timedelta(hours=4)
+    except Exception:
+        return None
+
+
+def _format_time_est(est_dt: datetime.datetime | None) -> str:
+    """Given an EST datetime, return a human‐readable time or 'TBD'."""
+    if not est_dt:
+        return "TBD"
+    return est_dt.strftime("%I:%M %p EST").lstrip("0")
+
+
+def _get_day_suffix(day: int) -> str:
+    """Return the English ordinal suffix for a given day of month."""
+    if 11 <= (day % 100) <= 13:
+        return "th"
+    return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
+
+
+def format_matchup(game: dict) -> tuple[str, datetime.datetime | None]:
+    """
+    Given a single game dict, return:
+     - the formatted string "AWAY @ HOME (TIME EST)"
+     - the parsed EST datetime (or None)
+    """
+    away_team = game["awayTeam"]["teamTricode"]
+    home_team = game["homeTeam"]["teamTricode"]
+    est_dt = _convert_utc_to_est(game.get("gameTimeUTC", ""))
+    time_str = _format_time_est(est_dt)
+    matchup_string = f"{away_team} @ {home_team} ({time_str})"
+    return matchup_string, est_dt
+
+
+def format_schedule(games: list[dict]) -> str:
+    """
+    Given a list of game dicts, return either:
+     - "No games scheduled."
+     - or "Month D[suffix]: MATCHUP1, MATCHUP2, …"
+    """
+    if not games:
+        return "No games scheduled."
+
+    matchups: list[str] = []
+    est_dts: list[datetime.datetime] = []
+
+    for game in games:
+        text, dt = format_matchup(game)
+        matchups.append(text)
+        if dt:
+            est_dts.append(dt)
+
+    if est_dts:
+        schedule_date = est_dts[0].date()
+        day = schedule_date.day
+        suffix = _get_day_suffix(day)
+        date_str = f"{schedule_date.strftime('%B')} {day}{suffix}"
+    else:
+        date_str = ""
+
+    return f"{date_str}: " + ", ".join(matchups)
