@@ -1,3 +1,4 @@
+import datetime
 import logging
 
 from nba_api.stats.static import players, teams
@@ -5,6 +6,7 @@ from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
 
 from managers.proxy import ProxyManager
+from managers.redis import RedisManager
 from utils.schedule_formatter import format_schedule
 
 logger = logging.getLogger(__name__)
@@ -16,7 +18,7 @@ class NBAClient:
     using a ProxyManager to rotate proxies on each request.
     """
 
-    def __init__(self, proxy_manager: ProxyManager):
+    def __init__(self, proxy_manager: ProxyManager, redis_manager: RedisManager):
         """
         Initialize the NBAClient.
 
@@ -24,6 +26,7 @@ class NBAClient:
             proxy_manager (ProxyManager): Manages which proxy to use for outgoing requests.
         """
         self.proxy_manager = proxy_manager
+        self.redis = redis_manager
 
     @staticmethod
     def _get_all_players() -> list[dict]:
@@ -128,6 +131,12 @@ class NBAClient:
         Returns:
             str: A summary of career PTS, REB, AST, FG% or an error/message if not found.
         """
+        cache_key = f"career:{name.lower()}"
+        cached = await self.redis.get(cache_key)
+        if cached:
+            logger.info(f"Cache hit for {name}")
+            return cached
+
         player = NBAClient._get_player_data(name)
         if not player:
             return f"Player not found: {name}"
@@ -154,10 +163,12 @@ class NBAClient:
             avg_ast = round(ast / gp, 1)
             fg_pct = round((fgm / fga) * 100, 1) if fga else 0.0
 
-            return (
+            result = (
                 f"{player['full_name']}: {avg_pts} PTS, "
                 f"{avg_reb} REB, {avg_ast} AST, {fg_pct}% FG"
             )
+            await self.redis.set(cache_key, result, expire_seconds=3600)
+            return result
         except Exception as e:
             logger.error(f"Error fetching player career: {e}")
             return "Something went wrong. Try again later."
@@ -236,12 +247,20 @@ class NBAClient:
         if not data:
             return f"Team not found: {name}"
 
+        cache_key = f"record:{data['id']}"
+        cached = await self.redis.get(cache_key)
+        if cached:
+            logger.info(f"Cache hit for {name.lower()}.")
+            return cached
+
         proxy = await self.proxy_manager.get_proxy()
         try:
             df = teamgamelog.TeamGameLog(
                 team_id=data["id"], proxy=proxy).get_data_frames()[0]
             w, l = df.iloc[0]["W"], df.iloc[0]["L"]
-            return f"The {data['full_name']} are {w} - {l}"
+            result = f"The {data['full_name']} are {w} - {l}"
+            await self.redis.set(cache_key, result, expire_seconds=3600)
+            return result
         except Exception as e:
             logger.error(f"Error fetching team record: {e}")
             return "Something went wrong. Try again later."
@@ -253,7 +272,15 @@ class NBAClient:
         Returns:
             str: A schedule, or "No games scheduled."
         """
+        cache_key = "schedule"
+        cached = await self.redis.get(cache_key)
+        if cached:
+            logger.info(f"Cache hit for {cache_key}.")
+            return cached
+
         proxy = await self.proxy_manager.get_proxy()
         games = scoreboard.ScoreBoard(proxy=proxy).get_dict()[
             "scoreboard"]["games"]
-        return format_schedule(games)
+        result = format_schedule(games)
+        await self.redis.set(cache_key, result, expire_seconds=3600)
+        return result

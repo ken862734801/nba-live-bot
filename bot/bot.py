@@ -10,9 +10,10 @@ from config import Config
 from managers.command import CommandManager
 from managers.database import DatabaseManager
 from managers.proxy import ProxyManager
+from managers.redis import RedisManager
 from managers.websocket import WebSocketManager
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
@@ -27,11 +28,12 @@ class Bot(commands.Bot):
         )
         self.supabase_client = create_client(
             Config.SUPABASE_URL, Config.SUPABASE_KEY)
+        self.proxy_manager = ProxyManager(Config.PROXY_LIST.split(","))
+        self.redis_manager = RedisManager()
         self.websocket_manager = WebSocketManager(self)
         self.database_manager = DatabaseManager(
             self.supabase_client, self.websocket_manager)
-        self.proxy_manager = ProxyManager(Config.PROXY_LIST.split(","))
-        self.nba_client = NBAClient(self.proxy_manager)
+        self.nba_client = NBAClient(self.proxy_manager, self.redis_manager)
 
     async def setup_hook(self) -> None:
         await self.add_component(CommandManager(self, self.nba_client))
