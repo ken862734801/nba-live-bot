@@ -16,6 +16,7 @@ class NBAClient:
     """
     Wrapper around the nba_api library to fetch NBA data (scores, stats, schedules),
     using a ProxyManager to rotate proxies on each request.
+    This class also caches results in Redis to reduce API calls and improve performance.
     """
 
     def __init__(self, proxy_manager: ProxyManager, redis_manager: RedisManager):
@@ -24,6 +25,7 @@ class NBAClient:
 
         Args:
             proxy_manager (ProxyManager): Manages which proxy to use for outgoing requests.
+            redis_manager (RedisManager): Manages Redis cache for storing data.
         """
         self.proxy_manager = proxy_manager
         self.redis = redis_manager
@@ -134,7 +136,7 @@ class NBAClient:
         cache_key = f"career:{name.lower()}"
         cached = await self.redis.get(cache_key)
         if cached:
-            logger.info(f"Cache hit for {name}")
+            logger.info(f"Cache hit for {name} career stats.")
             return cached
 
         player = NBAClient._get_player_data(name)
@@ -250,7 +252,7 @@ class NBAClient:
         cache_key = f"record:{data['id']}"
         cached = await self.redis.get(cache_key)
         if cached:
-            logger.info(f"Cache hit for {name.lower()}.")
+            logger.info(f"Cache hit for {name.lower()} season record.")
             return cached
 
         proxy = await self.proxy_manager.get_proxy()
@@ -275,7 +277,7 @@ class NBAClient:
         cache_key = "schedule"
         cached = await self.redis.get(cache_key)
         if cached:
-            logger.info(f"Cache hit for {cache_key}.")
+            logger.info(f"Cache hit for today's NBA schedule.")
             return cached
 
         proxy = await self.proxy_manager.get_proxy()
