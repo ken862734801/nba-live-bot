@@ -4,11 +4,11 @@ This bot provides real-time NBA statistics. Below is a list of available command
 
 ## `!career`
 
-**Description**: Provides a link to the full list of available bot commands.
+**Description**: Get the career statistics of a specific player.
 
 **Usage**:
 ```
-!career
+!career <player name>
 ```
 
 **Example**:
