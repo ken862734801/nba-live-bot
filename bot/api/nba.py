@@ -252,7 +252,7 @@ class NBAClient:
         cache_key = f"record:{data['id']}"
         cached = await self.redis.get(cache_key)
         if cached:
-            logger.info(f"Cache hit for {name.lower()} season record.")
+            logger.info(f"Cache hit for {name} season record.")
             return cached
 
         proxy = await self.proxy_manager.get_proxy()
