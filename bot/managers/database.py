@@ -14,7 +14,8 @@ class DatabaseManager:
     WS_URL = Config.SUPABASE_URL.replace("https", "wss") + "/realtime/v1"
 
     def __init__(self, supabase_client: Client, websocket_manager: WebSocketManager):
-        self.async_realtime_client = AsyncRealtimeClient(self.WS_URL, Config.SUPABASE_KEY, auto_reconnect=True)
+        self.async_realtime_client = AsyncRealtimeClient(
+            self.WS_URL, Config.SUPABASE_KEY, auto_reconnect=True)
         self.supabase_client = supabase_client
         self.websocket_manager = websocket_manager
 
@@ -37,19 +38,27 @@ class DatabaseManager:
         await self.async_realtime_client.connect()
         channel = self.async_realtime_client.channel(
             "realtime:public:channels")
-        
+
+        channel.on_postgres_changes(
+            event="INSERT",
+            schema="public",
+            table="channels",
+            callback=lambda payload: asyncio.create_task(
+                self.on_change(payload))
+        )
+
         channel.on_postgres_changes(
             event="UPDATE",
             schema="public",
             table="channels",
-            callback=lambda payload: asyncio.create_task(self.on_row_update(payload))
+            callback=lambda payload: asyncio.create_task(
+                self.on_change(payload))
         )
 
         await channel.subscribe()
-    
-    async def on_row_update(self, payload):
-        row = payload["data"]["record"]
 
+    async def on_change(self, payload):
+        row = payload["data"]["record"]
         if row["is_active"]:
             await self.websocket_manager.subscribe(row["broadcaster_user_id"])
         else:
