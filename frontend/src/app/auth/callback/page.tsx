@@ -15,8 +15,11 @@ export default function Callback() {
   }, [session, router])
 
   return (
-    <main>
-      <p>Redirecting...</p>
+    <main className="min-h-screen bg-[url('/nba-court-bg.png')] bg-cover bg-center flex items-center justify-center px-4">
+      <div className="text-center">
+        <div className="w-12 h-12 mx-auto mb-4 border-4 border-white border-t-transparent rounded-full animate-spin" />
+        <p className="text-white text-lg font-medium">Redirecting...</p>
+      </div>
     </main>
   )
 }
