@@ -36,7 +36,7 @@ class Bot(commands.Bot):
     async def setup_hook(self) -> None:
         await self.add_component(CommandManager(self, self.nba_client))
         await self.load_tokens()
-        await self.database_manager.seed()
+        await self.database_manager.init()
         await self.database_manager.listen()
 
     async def load_tokens(self) -> None:

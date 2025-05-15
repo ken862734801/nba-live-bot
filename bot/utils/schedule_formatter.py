@@ -3,13 +3,13 @@ import datetime
 
 def _convert_utc_to_est(utc_str: str) -> datetime.datetime | None:
     """
-    Converts a UTC datetime string to Eastern Standard Time (EST).
+    Parse a UTC timestamp string and convert it to Eastern Standard Time.
 
     Args:
-        utc_str (str): The UTC datetime string in the format "%Y-%m-%dT%H:%M:%SZ".
+        utc_str (str): A UTC datetime string in ISO format (e.g., "2025-05-15T19:30:00Z").
 
     Returns:
-        datetime.datetime | None: The converted datetime in EST, or None if the conversion fails.
+        datetime.datetime | None: The corresponding EST datetime (UTC−4), or None if parsing fails.
     """
     try:
         utc_dt = datetime.datetime.strptime(utc_str, "%Y-%m-%dT%H:%M:%SZ")
@@ -20,13 +20,13 @@ def _convert_utc_to_est(utc_str: str) -> datetime.datetime | None:
 
 def _format_time_est(est_dt: datetime.datetime | None) -> str:
     """
-    Formats the given datetime object in Eastern Standard Time (EST) format.
+    Format an EST datetime as a human-readable time string, or return "TBD" if not provided.
 
     Args:
-        est_dt (datetime.datetime | None): The datetime object to be formatted.
+        est_dt (datetime.datetime | None): The EST datetime to format.
 
     Returns:
-        str: The formatted time in the format "HH:MM AM/PM EST".
+        str: A string like "7:30 PM EST" (leading zero removed) or "TBD" if est_dt is None.
     """
     if not est_dt:
         return "TBD"
@@ -34,7 +34,15 @@ def _format_time_est(est_dt: datetime.datetime | None) -> str:
 
 
 def _get_day_suffix(day: int) -> str:
-    """Return the English ordinal suffix for a given day of month."""
+    """
+    Determine the English ordinal suffix for a given day of the month.
+
+    Args:
+        day (int): The day of the month (1–31).
+
+    Returns:
+        str: The ordinal suffix, one of "st", "nd", "rd", or "th".
+    """
     if 11 <= (day % 100) <= 13:
         return "th"
     return {1: "st", 2: "nd", 3: "rd"}.get(day % 10, "th")
@@ -42,13 +50,18 @@ def _get_day_suffix(day: int) -> str:
 
 def format_matchup(game: dict) -> tuple[str, datetime.datetime | None]:
     """
-    Formats the matchup information for a game.
+    Build a formatted matchup string and extract its EST datetime.
 
     Args:
-        game (dict): A dictionary containing the game information.
+        game (dict): A dictionary representing a game, expected to contain:
+                     - "awayTeam": {"teamTricode": str}
+                     - "homeTeam": {"teamTricode": str}
+                     - "gameTimeUTC": str (ISO timestamp)
 
     Returns:
-        tuple[str, datetime.datetime | None]: A tuple containing the formatted matchup string and the game time in EST.
+        tuple[str, datetime.datetime | None]:
+            - A string like "GSW @ LAL (7:30 PM EST)".
+            - The EST datetime object, or None if conversion failed.
     """
     away_team = game["awayTeam"]["teamTricode"]
     home_team = game["homeTeam"]["teamTricode"]
@@ -60,15 +73,14 @@ def format_matchup(game: dict) -> tuple[str, datetime.datetime | None]:
 
 def format_schedule(games: list[dict]) -> str:
     """
-    Given a list of game dicts, return either:
-     - "No games scheduled."
-     - or "Month D[suffix]: MATCHUP1, MATCHUP2, …"
+    Generate a daily schedule summary string for a list of games.
 
     Args:
-        games (list[dict]): A list of game dictionaries.
+        games (list[dict]): A list of game dictionaries as accepted by format_matchup().
 
     Returns:
-        str: The formatted schedule string.
+        str: A summary like "May 15th: GSW @ LAL (7:30 PM EST), BOS @ NYK (8:00 PM EST)".
+             Returns "No games scheduled." if the list is empty.
     """
     if not games:
         return "No games scheduled."
@@ -83,10 +95,10 @@ def format_schedule(games: list[dict]) -> str:
             est_dts.append(dt)
 
     if est_dts:
-        schedule_date = est_dts[0].date()
-        day = schedule_date.day
+        first_date = est_dts[0].date()
+        day = first_date.day
         suffix = _get_day_suffix(day)
-        date_str = f"{schedule_date.strftime('%B')} {day}{suffix}"
+        date_str = f"{first_date.strftime('%B')} {day}{suffix}"
     else:
         date_str = ""
 
