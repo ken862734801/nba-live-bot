@@ -6,7 +6,7 @@ from twitchio import eventsub
 from twitchio.ext import commands
 
 from config import Config
-from commands import CommandComponent
+from managers import CommandManager
 from services.realtime_listener import RealtimeListener
 from services.twitch.eventsub import subscribe_to_websocket
 
@@ -24,7 +24,7 @@ class Bot(commands.Bot):
         self.realtime_listener = RealtimeListener(self)
 
     async def setup_hook(self) -> None:
-        await self.add_component(CommandComponent(self))
+        await self.add_component(CommandManager(self))
         await self.load_tokens()
         await self.join_all()
         await self.realtime_listener.start()
