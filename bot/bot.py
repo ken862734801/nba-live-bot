@@ -49,7 +49,7 @@ def main() -> None:
         try:
             await bot.start()
         finally:
-            await bot.database_manager.async_realtime_client.close()
+            await bot.database_manager.close()
     asyncio.run(runner())
 
 
