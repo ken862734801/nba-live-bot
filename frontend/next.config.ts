@@ -1,7 +1,10 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ['static-cdn.jtvnw.net'],
+    // if you also load from other hosts, add them here:
+    // domains: ['static-cdn.jtvnw.net', 'another.cdn.com']
+  },
+}
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-export default nextConfig;
+module.exports = nextConfig
