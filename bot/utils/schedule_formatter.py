@@ -2,7 +2,15 @@ import datetime
 
 
 def _convert_utc_to_est(utc_str: str) -> datetime.datetime | None:
-    """Parse a UTC timestamp string and convert to EST datetime, or return None on failure."""
+    """
+    Converts a UTC datetime string to Eastern Standard Time (EST).
+
+    Args:
+        utc_str (str): The UTC datetime string in the format "%Y-%m-%dT%H:%M:%SZ".
+
+    Returns:
+        datetime.datetime | None: The converted datetime in EST, or None if the conversion fails.
+    """
     try:
         utc_dt = datetime.datetime.strptime(utc_str, "%Y-%m-%dT%H:%M:%SZ")
         return utc_dt - datetime.timedelta(hours=4)
@@ -11,7 +19,15 @@ def _convert_utc_to_est(utc_str: str) -> datetime.datetime | None:
 
 
 def _format_time_est(est_dt: datetime.datetime | None) -> str:
-    """Given an EST datetime, return a human‐readable time or 'TBD'."""
+    """
+    Formats the given datetime object in Eastern Standard Time (EST) format.
+
+    Args:
+        est_dt (datetime.datetime | None): The datetime object to be formatted.
+
+    Returns:
+        str: The formatted time in the format "HH:MM AM/PM EST".
+    """
     if not est_dt:
         return "TBD"
     return est_dt.strftime("%I:%M %p EST").lstrip("0")
@@ -26,9 +42,13 @@ def _get_day_suffix(day: int) -> str:
 
 def format_matchup(game: dict) -> tuple[str, datetime.datetime | None]:
     """
-    Given a single game dict, return:
-     - the formatted string "AWAY @ HOME (TIME EST)"
-     - the parsed EST datetime (or None)
+    Formats the matchup information for a game.
+
+    Args:
+        game (dict): A dictionary containing the game information.
+
+    Returns:
+        tuple[str, datetime.datetime | None]: A tuple containing the formatted matchup string and the game time in EST.
     """
     away_team = game["awayTeam"]["teamTricode"]
     home_team = game["homeTeam"]["teamTricode"]
@@ -43,6 +63,12 @@ def format_schedule(games: list[dict]) -> str:
     Given a list of game dicts, return either:
      - "No games scheduled."
      - or "Month D[suffix]: MATCHUP1, MATCHUP2, …"
+
+    Args:
+        games (list[dict]): A list of game dictionaries.
+
+    Returns:
+        str: The formatted schedule string.
     """
     if not games:
         return "No games scheduled."
