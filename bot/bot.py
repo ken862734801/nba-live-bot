@@ -5,12 +5,14 @@ import os
 from supabase import create_client, Client
 from twitchio.ext import commands
 
+from api.nba import NBAClient
 from config import Config
 from managers.command import CommandManager
 from managers.database import DatabaseManager
+from managers.proxy import ProxyManager
 from managers.websocket import WebSocketManager
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
@@ -23,15 +25,16 @@ class Bot(commands.Bot):
             bot_id=Config.BOT_ID,
             prefix="!",
         )
-
         self.supabase_client = create_client(
             Config.SUPABASE_URL, Config.SUPABASE_KEY)
         self.websocket_manager = WebSocketManager(self)
         self.database_manager = DatabaseManager(
             self.supabase_client, self.websocket_manager)
+        self.proxy_manager = ProxyManager(Config.PROXY_LIST.split(","))
+        self.nba_client = NBAClient(self.proxy_manager)
 
     async def setup_hook(self) -> None:
-        await self.add_component(CommandManager(self))
+        await self.add_component(CommandManager(self, self.nba_client))
         await self.load_tokens()
         await self.database_manager.seed()
         await self.database_manager.listen()

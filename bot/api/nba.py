@@ -1,13 +1,19 @@
 import logging
+
 from nba_api.stats.static import players, teams
 from nba_api.stats.endpoints import playercareerstats, teamgamelog
 from nba_api.live.nba.endpoints import scoreboard, boxscore
+
+from managers.proxy import ProxyManager
 from utils.schedule_formatter import format_schedule
 
 logger = logging.getLogger(__name__)
 
 
 class NBAClient:
+    def __init__(self, proxy_manager: ProxyManager):
+        self.proxy_manager = proxy_manager
+
     @staticmethod
     def _get_all_players():
         """Get all NBA players.
@@ -62,8 +68,7 @@ class NBAClient:
         logger.warning(f"Team not found: {name}")
         return None
 
-    @staticmethod
-    def get_game_score(name: str) -> str:
+    async def get_game_score(self, name: str) -> str:
         """Get the score of a specific team's game.
 
         Args:
@@ -75,8 +80,9 @@ class NBAClient:
         data = NBAClient._get_team_data(name)
         if not data:
             return f"Team not found: {name}"
+        proxy = await self.proxy_manager.get_proxy()
         try:
-            _scoreboard = scoreboard.ScoreBoard()
+            _scoreboard = scoreboard.ScoreBoard(proxy=proxy)
             games = _scoreboard.get_dict()["scoreboard"]["games"]
             for game in games:
                 home_team, away_team = game["homeTeam"], game["awayTeam"]
@@ -92,8 +98,7 @@ class NBAClient:
             logger.error(f"Error fetching game score: {e}")
             return f'Something went wrong. Try again later.'
 
-    @staticmethod
-    def get_player_career(name: str) -> str:
+    async def get_player_career(self, name: str) -> str:
         """Get the career statistics of a specific player.
 
         Args:
@@ -105,9 +110,11 @@ class NBAClient:
         player = NBAClient._get_player_data(name)
         if not player:
             return f"Player not found: {name}"
+        proxy = await self.proxy_manager.get_proxy()
         try:
             career = playercareerstats.PlayerCareerStats(
-                player_id=player["id"]
+                player_id=player["id"],
+                proxy=proxy,
             )
             df = career.get_data_frames()[0]
             if df.empty:
@@ -131,8 +138,7 @@ class NBAClient:
             logger.error(f"Error fetching player career: {e}")
             return f'Something went wrong. Try again later.'
 
-    @staticmethod
-    def get_player_statline(name: str) -> str:
+    async def get_player_statline(self, name: str) -> str:
         """Get the statline of a specific player in the current game.
 
         Args:
@@ -141,8 +147,9 @@ class NBAClient:
         Returns:
             str: The player's statline in the format "Player Name: Points PTS (Field Goals Made/Attempted FG, Three Pointers Made/Attempted 3PT, Free Throws Made/Attempted FT), Rebounds REB, Assists AST, Steals STL, Blocks BLK, Turnovers TO in Minutes MIN".
         """
+        proxy = await self.proxy_manager.get_proxy()
         try:
-            _scoreboard = scoreboard.ScoreBoard()
+            _scoreboard = scoreboard.ScoreBoard(proxy=proxy)
             games = _scoreboard.get_dict()["scoreboard"]["games"]
 
             for game in games:
@@ -190,8 +197,7 @@ class NBAClient:
             logger.error(f"Error fetching player statline: {e}")
             return 'Something went wrong. Try again later.'
 
-    @staticmethod
-    def get_team_record(name: str) -> str:
+    async def get_team_record(self, name: str) -> str:
         """Get the win-loss record of a specific team.
 
         Args:
@@ -203,8 +209,10 @@ class NBAClient:
         data = NBAClient._get_team_data(name)
         if not data:
             return f"Team not found: {name}"
+        proxy = await self.proxy_manager.get_proxy()
         try:
-            _teamgamelog = teamgamelog.TeamGameLog(team_id=data["id"])
+            _teamgamelog = teamgamelog.TeamGameLog(
+                team_id=data["id"], proxy=proxy)
             df = _teamgamelog.get_data_frames()[0]
             w, l = df.iloc[0]["W"], df.iloc[0]["L"]
             return f"The {data['full_name']} are {w} - {l}"
@@ -212,13 +220,13 @@ class NBAClient:
             logger.error(f"Error fetching team record: {e}")
             return 'Something went wrong. Try again later.'
 
-    @staticmethod
-    def get_schedule() -> str:
+    async def get_schedule(self) -> str:
         """Get the NBA game schedule.
 
         Returns:
             str: The formatted game schedule.
         """
-        _scoreboard = scoreboard.ScoreBoard()
+        proxy = await self.proxy_manager.get_proxy()
+        _scoreboard = scoreboard.ScoreBoard(proxy=proxy)
         games = _scoreboard.get_dict()["scoreboard"]["games"]
         return format_schedule(games)

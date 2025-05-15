@@ -57,23 +57,12 @@ class DatabaseManager:
 
         await channel.subscribe()
 
+    async def close(self):
+        await self.async_realtime_client.close()
+
     async def on_change(self, payload):
         row = payload["data"]["record"]
         if row["is_active"]:
             await self.websocket_manager.subscribe(row["broadcaster_user_id"])
         else:
             await self.websocket_manager.unsubscribe(row["broadcaster_user_id"])
-
-    async def close(self):
-        await self.async_realtime_client.close()
-    
-    async def increment_command_count(self, channel_id: str, command: str) -> None:
-        try:
-            response = self.supabase_client.rpc(
-                "increment_command_count",
-                {"p_channel_id": channel_id, "p_command": command}
-            ).execute()
-        except Exception as e:
-            logger.exception("Failed to call increment_command_count RPC", exc_info=e)
-
-
