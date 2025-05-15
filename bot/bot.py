@@ -1,14 +1,18 @@
-import os
 import asyncio
+import logging
+import os
 
 from supabase import create_client, Client
-from twitchio import eventsub
 from twitchio.ext import commands
 
 from config import Config
-from managers import CommandManager
-from services.realtime_listener import RealtimeListener
-from services.twitch.eventsub import subscribe_to_websocket
+from managers.command import CommandManager
+from managers.database import DatabaseManager
+from managers.websocket import WebSocketManager
+
+logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger(__name__)
 
 
 class Bot(commands.Bot):
@@ -19,25 +23,18 @@ class Bot(commands.Bot):
             bot_id=Config.BOT_ID,
             prefix="!",
         )
+
         self.supabase_client = create_client(
             Config.SUPABASE_URL, Config.SUPABASE_KEY)
-        self.realtime_listener = RealtimeListener(self)
+        self.websocket_manager = WebSocketManager(self)
+        self.database_manager = DatabaseManager(
+            self.supabase_client, self.websocket_manager)
 
     async def setup_hook(self) -> None:
         await self.add_component(CommandManager(self))
         await self.load_tokens()
-        await self.join_all()
-        await self.realtime_listener.start()
-
-    async def join_all(self) -> None:
-        rows = self.supabase_client.table("channels").select(
-            "broadcaster_user_id").eq("is_active", True).execute().data
-        for row in rows:
-            broadcaster_user_id = row.get("broadcaster_user_id")
-            if broadcaster_user_id:
-                await subscribe_to_websocket(self, broadcaster_user_id)
-            else:
-                print("Row missing 'broadcaster_user_id':", row)
+        await self.database_manager.seed()
+        await self.database_manager.listen()
 
     async def load_tokens(self) -> None:
         await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
@@ -52,7 +49,7 @@ def main() -> None:
         try:
             await bot.start()
         finally:
-            await bot.realtime_listener.client.close()
+            await bot.database_manager.async_realtime_client.close()
     asyncio.run(runner())
 
 
