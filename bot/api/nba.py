@@ -97,22 +97,30 @@ class NBAClient:
 
     async def get_player_career(self, name: str) -> str:
         """
-        Compute and return a player's career averages, using the rotating proxy (no caching).
+        Compute and return a player's career averages, using the rotating proxy.
+        Results are cached in Redis for 1 hour.
         """
         player = NBAClient._get_player_data(name)
         if not player:
             return f"Player not found: {name}"
 
+        cache_key = f"career:{player['id']}"
+        cached = await self.redis.get(cache_key)
+        if cached:
+            logger.info(f"Cache hit for career stats of {name}")
+            return cached
+
         proxy = await self.proxy_manager.get_proxy()
         career_df = playercareerstats.PlayerCareerStats(
-            player_id=player["id"], proxy=proxy
+            player_id=player["id"],
+            proxy=proxy
         ).get_data_frames()[0]
 
         if career_df.empty:
             logger.warning(f"No career data for {name}")
             return "No career data available."
 
-        gp = career_df["GP"].sum()
+        gp  = career_df["GP"].sum()
         pts = career_df["PTS"].sum()
         reb = career_df["REB"].sum()
         ast = career_df["AST"].sum()
@@ -122,12 +130,15 @@ class NBAClient:
         avg_pts = round(pts / gp, 1) if gp else 0.0
         avg_reb = round(reb / gp, 1) if gp else 0.0
         avg_ast = round(ast / gp, 1) if gp else 0.0
-        fg_pct = round((fgm / fga) * 100, 1) if fga else 0.0
+        fg_pct  = round((fgm / fga) * 100, 1) if fga else 0.0
 
-        return (
+        result = (
             f"{player['full_name']}: "
             f"{avg_pts} PTS, {avg_reb} REB, {avg_ast} AST, {fg_pct}% FG"
         )
+
+        await self.redis.set(cache_key, result, expire_seconds=3600)
+        return result
 
     async def get_player_statline(self, name: str) -> str:
         """
