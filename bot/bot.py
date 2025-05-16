@@ -28,7 +28,7 @@ class Bot(commands.Bot):
         )
         self.supabase_client = create_client(
             Config.SUPABASE_URL, Config.SUPABASE_KEY)
-        self.proxy_manager = ProxyManager(Config.PROXY_LIST.split(","))
+        self.proxy_manager = ProxyManager(Config.PROXY_URL)
         self.redis_manager = RedisManager()
         self.websocket_manager = WebSocketManager(self)
         self.database_manager = DatabaseManager(
