@@ -17,7 +17,6 @@ logging.basicConfig(level=logging.ERROR)
 
 logger = logging.getLogger(__name__)
 
-
 class Bot(commands.Bot):
     def __init__(self) -> None:
         super().__init__(
