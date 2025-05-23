@@ -107,7 +107,7 @@ This bot provides real-time NBA statistics. Below is a list of available command
 
 ---
 
-## `!statline`
+## `!stats`
 
 **Description**: Get the live statline for a specific NBA player.
 
@@ -130,4 +130,4 @@ This bot provides real-time NBA statistics. Below is a list of available command
 
 ## Cooldown
 
-All commands have a **per-channel cooldown** of 5 seconds to prevent spam.
+All commands have a **per-channel cooldown** of 10 seconds to prevent spam.
