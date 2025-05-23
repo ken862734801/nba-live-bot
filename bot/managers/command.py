@@ -3,12 +3,27 @@ from twitchio.ext import commands
 
 from api.nba import NBAClient
 from config import Config
+from utils.keyword_handler import KeywordHandler
 
 
 class CommandManager(commands.Component):
     def __init__(self, bot: commands.Bot, nba_client: NBAClient):
         self.bot = bot
         self.nba_client = nba_client
+        self.keyword_handler = KeywordHandler()
+
+    @commands.Component.listener()
+    async def event_message(self, payload: twitchio.ChatMessage):
+        if payload.chatter.name.lower() == Config.BOT_USERNAME.lower():
+            return None
+
+        response = self.keyword_handler.get_response(
+            payload.text, payload.broadcaster.name)
+        if response:
+            await payload.broadcaster.send_message(
+                sender=self.bot.bot_id,
+                message=response
+            )
 
     @commands.command(name="career")
     @commands.cooldown(rate=1, per=5, key=commands.BucketType.channel)

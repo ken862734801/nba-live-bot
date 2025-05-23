@@ -41,7 +41,7 @@ class Bot(commands.Bot):
         await self.database_manager.listen()
 
     async def load_tokens(self) -> None:
-        await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN),
+        await super().add_token(Config.TWITCH_ACCESS_TOKEN, Config.TWITCH_REFRESH_TOKEN)
 
     async def event_ready(self) -> None:
         print(f"{Config.BOT_USERNAME} is ONLINE and READY to receive commands.")
