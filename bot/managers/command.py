@@ -27,7 +27,7 @@ class CommandManager(commands.Component):
         response = await self.nba_client.get_game_score(team)
         await ctx.send(f"@{ctx.author.name} {response}")
 
-    @commands.command(name="statline")
+    @commands.command(name="stats")
     @commands.cooldown(rate=1, per=10, key=commands.BucketType.channel)
     async def statline(self, ctx: commands.Context, *, player: str) -> None:
         response = await self.nba_client.get_player_statline(player)
