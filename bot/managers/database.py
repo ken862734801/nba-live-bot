@@ -50,6 +50,7 @@ class DatabaseManager:
             .execute()
         )
         rows = response.data
+        print(rows)
         for row in rows:
             broadcaster_user_id = row.get("broadcaster_user_id")
             if not broadcaster_user_id:
