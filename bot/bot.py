@@ -13,7 +13,7 @@ from managers.proxy import ProxyManager
 from managers.redis import RedisManager
 from managers.websocket import WebSocketManager
 
-logging.basicConfig(level=logging.ERROR)
+logging.basicConfig(level=logging.INFO)
 
 logger = logging.getLogger(__name__)
 
