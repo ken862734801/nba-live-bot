@@ -4,7 +4,7 @@ import random
 class KeywordHandler:
     def __init__(self):
         self.cooldowns = {}
-        self.duration = 15
+        self.duration = 60
     
         self.handlers = {
             "lakers": self.handle_lakers_keyword
