@@ -31,6 +31,7 @@ class WebSocketManager:
             user_id=self.bot.bot_id,
         )
         await self.bot.subscribe_websocket(payload=subscription)
+        logger.info("Successfully joined channel: %s", broadcaster_user_id)
 
     async def unsubscribe(self, broadcaster_user_id: str) -> None:
         """
