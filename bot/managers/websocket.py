@@ -1,4 +1,8 @@
+import logging
+
 from twitchio import eventsub
+
+logger = logging.getLogger(__name__)
 
 
 class WebSocketManager:
